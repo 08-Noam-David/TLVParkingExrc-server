@@ -1,13 +1,12 @@
-const fs = require("fs");
+const fs = require("fs/promises");
 const { PARKINGS_JSON_PATH } = require("./definitions.js");
 
-function updateParkings(parkings) {
-  fs.writeFileSync(PARKINGS_JSON_PATH, JSON.stringify(parkings), "utf8");
-
+async function updateParkings(parkings) {
+  await fs.writeFile(PARKINGS_JSON_PATH, JSON.stringify(parkings), { encoding: "utf8" });
 }
 
-function getParkings() {
-  return JSON.parse(fs.readFileSync(PARKINGS_JSON_PATH, "utf8"));
+async function getParkings() {
+  return JSON.parse(await fs.readFile(PARKINGS_JSON_PATH, "utf8"));
 }
 
 module.exports = {
