@@ -2,6 +2,7 @@ const express = require('express');
 const shortid = require('shortid');
 const cors = require('cors');
 const { getParkings, updateParkings } = require('./utils');
+const { getParking, getAllParkings } = require('./database.js');
 const PORT = 3000;
 
 const app = express();
@@ -18,18 +19,18 @@ app.use((req, res, next) => {
 //Endpoints
 
 app.get('/api/parking/:id', async (req, res) => {
-  const parkingId = req.params.id;
-  const parkings = await getParkings(); 
-  requestedParking = parkings.find((parking) => parking.id === parkingId);
+  const id = req.params.id;
+  const parking = await getParking(id); 
 
-  if (!requestedParking) {
-    res.status(404).send(`parking ${parkingId} not found`);
+  if (!parking) {
+    res.status(404).send(`parking ${id} not found`);
   } else {
-    res.send(requestedParking);
+    res.send(parking);
   }
 });
+
 app.get('/api/parkings', async (req, res) => {
-  const parkings = await getParkings();
+  const parkings = await getAllParkings();
 
   if (!parkings || !parkings.length) {
     res.status(404).send(`Parkings do not exist`);

@@ -1,27 +1,42 @@
-const { Client } = require('pg');
+const { Pool } = require('pg');
+const { poolConfig } = require('./utils.js');
 
-const createClient = () =>
-  new Client({
-    user: 'postgres',
-    password: '123',
-    host: 'localhost',
-    port: 5432,
-    database: 'tlvparking',
-  });
+const pool = new Pool(poolConfig);
 
-const getParking = async (id) => {
-  const client = createClient();
+const executeQuery = async (query, params) => {
+  const client = await pool.connect();
   try {
-    await createClient();
-    return (await client.query(`
-    SELECT *
-    FROM t_parkings
-    WHERE parking_id = $1::serial;
-    `, [id]))[0];
-    console.log('connected');
+    return client.query(query, params);
+  } catch (e) {
+    console.log(e);
   } finally {
-    await client.end();
+    client.release();
   }
 };
 
-module.exports = { getParking };
+const getParking = async (id) => {
+  const parkings = await executeQuery(
+    `
+    SELECT id, x_coord, y_coord, address, time
+    FROM t_parkings
+    WHERE id = $1
+    `,
+    [id]
+  );
+
+  return parkings.rows[0];
+};
+
+const getAllParkings = async () => {
+  const parkings = await executeQuery(
+    `
+    SELECT id, x_coord, y_coord, address, time
+    FROM t_parkings
+    `,
+    []
+  );
+
+  return parkings.rows;
+}
+
+module.exports = { getParking, getAllParkings };
