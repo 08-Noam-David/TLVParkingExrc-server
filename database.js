@@ -61,10 +61,16 @@ const updateParking = async (parking) => {
   const result = await executeQuery(
     `
   UPDATE t_parkings
-  SET x_coord = $1, y_coord = $2, address = $3
+  SET x_coord = $1, y_coord = $2, address = $3, time = $5
   WHERE id = $4
   `,
-    [parking.x_coord, parking.y_coord, parking.address, parking.id]
+    [
+      parking.x_coord,
+      parking.y_coord,
+      parking.address,
+      parking.id,
+      parking.time,
+    ]
   );
 
   return result.rowCount === 1;
