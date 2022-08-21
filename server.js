@@ -2,7 +2,7 @@ const express = require('express');
 const shortid = require('shortid');
 const cors = require('cors');
 const { getParkings, updateParkings } = require('./utils');
-const { getParking, getAllParkings, creatParking } = require('./database.js');
+const { getParking, getAllParkings, creatParking, updateParking } = require('./database.js');
 const PORT = 3000;
 
 const app = express();
@@ -58,14 +58,27 @@ app.post('/api/parking', async (req, res) => {
 
 app.put('/api/parking', async (req, res) => {
   const id = req.body.id;
-  const parkings = await getParkings();
+  const oldParking = await getParking(id);
   
-  let updatedParkings = parkings.map((parking) =>
-    parking.id === id ? req.body : parking
-  );
+  if(oldParking) {
+    const updatedParking = {
+      id,
+      x_coord: req.body.x_coord ?? oldParking.x_coord,
+      y_coord: req.body.y_coord ?? oldParking.y_coord,
+      address: req.body.address ?? oldParking.address,
+      time: req.body.time ?? oldParking.time
+    };
 
-  await updateParkings(updatedParkings);
-  res.send(req.body);
+    const result = await updateParking(updatedParking);
+
+    if(result) {
+      res.send(updatedParking);
+    } else {
+      res.status(500).send('Something went wrong');
+    }
+  } else {
+    res.status(404).send('The parking you wanted to update doesn\'t exist');
+  }
 });
 
 //Delete
