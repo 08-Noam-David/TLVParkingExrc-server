@@ -58,18 +58,35 @@ const creatParking = async (newParking) => {
 };
 
 const updateParking = async (parking) => {
-  const result = await executeQuery(`
+  const result = await executeQuery(
+    `
   UPDATE t_parkings
   SET x_coord = $1, y_coord = $2, address = $3
   WHERE id = $4
-  `, [
-    parking.x_coord,
-    parking.y_coord,
-    parking.address,
-    parking.id
-  ]);
+  `,
+    [parking.x_coord, parking.y_coord, parking.address, parking.id]
+  );
 
   return result.rowCount === 1;
-}
+};
 
-module.exports = { getParking, getAllParkings, creatParking, updateParking };
+const deleteParking = (id) => {
+  const result = executeQuery(
+    `
+  DELETE
+  FROM t_parkings
+  WHERE id = $1
+  `,
+    [id]
+  );
+
+  result.rowCount === 1;
+};
+
+module.exports = {
+  getParking,
+  getAllParkings,
+  creatParking,
+  updateParking,
+  deleteParking,
+};

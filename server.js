@@ -2,7 +2,13 @@ const express = require('express');
 const shortid = require('shortid');
 const cors = require('cors');
 const { getParkings, updateParkings } = require('./utils');
-const { getParking, getAllParkings, creatParking, updateParking } = require('./database.js');
+const {
+  getParking,
+  getAllParkings,
+  creatParking,
+  updateParking,
+  deleteParking,
+} = require('./database.js');
 const PORT = 3000;
 
 const app = express();
@@ -14,13 +20,13 @@ app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   res.setHeader('Access-Control-Allow-Credentials', true);
   next();
-})
+});
 
 //Endpoints
 
 app.get('/api/parking/:id', async (req, res) => {
   const id = req.params.id;
-  const parking = await getParking(id); 
+  const parking = await getParking(id);
 
   if (!parking) {
     res.status(404).send(`parking ${id} not found`);
@@ -45,11 +51,11 @@ app.post('/api/parking', async (req, res) => {
     x_coord: req.body.x_coord,
     y_coord: req.body.y_coord,
     address: req.body.address,
-    time: (new Date()).toISOString(),
+    time: new Date().toISOString(),
   };
 
   const result = await creatParking(newParking);
-  if(result) {
+  if (result) {
     res.send(newParking);
   } else {
     res.status(500).send('Something went wrong');
@@ -59,44 +65,43 @@ app.post('/api/parking', async (req, res) => {
 app.put('/api/parking', async (req, res) => {
   const id = req.body.id;
   const oldParking = await getParking(id);
-  
-  if(oldParking) {
+
+  if (oldParking) {
     const updatedParking = {
       id,
       x_coord: req.body.x_coord ?? oldParking.x_coord,
       y_coord: req.body.y_coord ?? oldParking.y_coord,
       address: req.body.address ?? oldParking.address,
-      time: req.body.time ?? oldParking.time
+      time: req.body.time ?? oldParking.time,
     };
 
     const result = await updateParking(updatedParking);
 
-    if(result) {
+    if (result) {
       res.send(updatedParking);
     } else {
       res.status(500).send('Something went wrong');
     }
   } else {
-    res.status(404).send('The parking you wanted to update doesn\'t exist');
+    res.status(404).send("The parking you wanted to update doesn't exist");
   }
 });
 
 //Delete
 app.delete('/api/parking/:id', async (req, res) => {
-  const parkingId = req.params.id;
-  const parkings = await getParkings();
+  const id = req.params.id;
+  const toBeDeleted = await getParking(id);
 
-  //findIndex+splice
-  const indexToRemove = parkings.findIndex(
-    (parking) => parking.id === parkingId
-  );
+  if (toBeDeleted) {
+    const result = await deleteParking(id);
 
-  if (indexToRemove === -1) {
-    res.status(404).send('Parking not found. Deletion failed.');
+    if (result) {
+      res.send(toBeDeleted);
+    } else {
+      res.status(500).send('Something went wrong');
+    }
   } else {
-    parkings.splice(indexToRemove, 1);
-    await updateParkings(parkings);
-    res.send(`Parking ${parkingId} has been deleted`);
+    res.status(404).send("The parking you wanted to update doesn't exist");
   }
 });
 
