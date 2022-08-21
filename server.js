@@ -2,7 +2,7 @@ const express = require('express');
 const shortid = require('shortid');
 const cors = require('cors');
 const { getParkings, updateParkings } = require('./utils');
-const { getParking, getAllParkings } = require('./database.js');
+const { getParking, getAllParkings, creatParking } = require('./database.js');
 const PORT = 3000;
 
 const app = express();
@@ -41,18 +41,19 @@ app.get('/api/parkings', async (req, res) => {
 
 //  Create
 app.post('/api/parking', async (req, res) => {
-  const parkings = await getParkings();
   const newParking = {
-    id: shortid.generate(),
     x_coord: req.body.x_coord,
     y_coord: req.body.y_coord,
     address: req.body.address,
-    time: Date.now(),
+    time: (new Date()).toISOString(),
   };
 
-  parkings.push(newParking);
-  await updateParkings(parkings);
-  res.send(newParking);
+  const result = await creatParking(newParking);
+  if(result) {
+    res.send(newParking);
+  } else {
+    res.status(500).send('Something went wrong');
+  }
 });
 
 app.put('/api/parking', async (req, res) => {

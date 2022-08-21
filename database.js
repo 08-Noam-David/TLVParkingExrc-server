@@ -37,6 +37,24 @@ const getAllParkings = async () => {
   );
 
   return parkings.rows;
-}
+};
 
-module.exports = { getParking, getAllParkings };
+const creatParking = async (newParking) => {
+  const result = await executeQuery(
+    `
+  INSERT
+  INTO t_parkings (x_coord, y_coord, address, time)
+  VALUES ($1, $2, $3, $4)
+  `,
+    [
+      newParking.x_coord,
+      newParking.y_coord,
+      newParking.address,
+      newParking.time,
+    ]
+  );
+
+  return result.rowCount === 1;
+};
+
+module.exports = { getParking, getAllParkings, creatParking };
