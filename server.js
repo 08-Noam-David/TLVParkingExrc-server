@@ -19,7 +19,7 @@ app.use((req, res, next) => {
 
 app.get('/api/parking/:id', async (req, res) => {
   const parkingId = req.params.id;
-  const parkings = await getParkings();
+  const parkings = await getParkings(); 
   requestedParking = parkings.find((parking) => parking.id === parkingId);
 
   if (!requestedParking) {
